@@ -107,7 +107,7 @@ export const adapter = {
         { name: 'app_snapshot', description: 'Free — current version, rating and recent reviews for an App Store app. Target = numeric app id.',
           inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] },
           price: () => 0, run: async (a) => (await adapter.snapshot(parseTarget(a.target))) },
-        { name: 'app_review_changes', description: '$0.05 — new/removed reviews (flags new negative reviews) vs history.',
+        { name: 'app_review_changes', description: 'PAID ($0.05 USDC on Base via x402). Review change detection vs history: new reviews, removed reviews, and flags every new negative review (1-2 stars). Use for "did our app get bad reviews", review monitoring, complaint/bug outbreak alerts, reputation-risk tracking after a release.',
           inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] },
           price: () => 0.05, run: async (a, env) => adapter._changes(a.target) },
         { name: 'app_intel_report', description: '$0.50 — sentiment & negative-review report with takeaways.',
