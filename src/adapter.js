@@ -113,6 +113,12 @@ export const adapter = {
         { name: 'app_intel_report', description: '$0.50 — sentiment & negative-review report with takeaways.',
           inputSchema: { type: 'object', properties: { target: { type: 'string' } }, required: ['target'] },
           price: () => 0.5, run: async (a) => adapter._report(a.target) },
+        { name: 'app_batch_scan', description: '$0.03/app — scan up to 50 App Store apps (version, rating, recent negatives).',
+          inputSchema: { type: 'object', properties: { targets: { type: 'array', items: { type: 'string' } } }, required: ['targets'] },
+          price: (a) => (a.targets || []).slice(0, 50).length * 0.03, run: async (a) => adapter._batch(a.targets) },
+        { name: 'app_landscape', description: '$5 — app landscape across up to 10 apps with rating ranking and risk flags.',
+          inputSchema: { type: 'object', properties: { targets: { type: 'array', items: { type: 'string' } } }, required: ['targets'] },
+          price: () => 5, run: async (a) => adapter._landscape(a.targets) },
     ],
     async _changes(targetStr) {
         const t = parseTarget(targetStr); const s = await fetchSnapshot(t);
@@ -123,11 +129,38 @@ export const adapter = {
         const t = parseTarget(targetStr); const s = await fetchSnapshot(t);
         return buildReport(s.meta, s.items, []);
     },
-    llmsTxt: (c) => `# ${TITLE}\n\n> Track public App Store apps: new reviews, ratings, version updates. Free snapshot; paid intel in USDC via x402 on Base.\n\n- MCP: https://${c.HOST}/mcp\n- Free: https://${c.HOST}/v1/snapshot?target=389801252\n`,
+    async _batch(targets) {
+        const list = Array.isArray(targets) ? targets.slice(0, 50) : [];
+        const out = [];
+        await Promise.all(list.map(async (raw) => {
+            const t = parseTarget(raw); if (!t) return;
+            try {
+                const s = await fetchSnapshot(t);
+                const neg = s.items.filter(x => x.rating <= 2).length;
+                out.push({ target: s.handle, app: s.meta.name, version: s.meta.version, rating: s.meta.rating, recentReviews: s.items.length, recentNegative: neg });
+            } catch (e) { out.push({ target: raw, error: String(e?.message || e) }); }
+        }));
+        return { scanned: out.length, apps: out };
+    },
+    async _landscape(targets) {
+        const list = Array.isArray(targets) ? targets.slice(0, 10) : [];
+        const b = await adapter._batch(list);
+        const ranked = b.apps.filter(x => !x.error).sort((x, y) => (y.rating || 0) - (x.rating || 0));
+        return {
+            compared: ranked.length,
+            ranking: ranked.map((x, i) => ({ rank: i + 1, app: x.app, rating: x.rating, version: x.version, recentNegative: x.recentNegative })),
+            takeaways: ranked.length ? [
+                `Highest rated: ${ranked[0].app} (${ranked[0].rating})`,
+                ranked[ranked.length - 1] ? `Watch: ${ranked[ranked.length - 1].app} has the lowest rating in this set` : '',
+                ranked.filter(x => x.recentNegative > 2).map(x => `⚠️ ${x.app} has ${x.recentNegative} recent negative reviews`).join('; ') || 'No app shows a spike in recent negative reviews',
+            ].filter(Boolean) : [],
+        };
+    },
+    llmsTxt: (c) => `# ${TITLE}\n\n> Track public App Store apps: new reviews, ratings, version updates. Free snapshot; paid intel in USDC via x402 on Base.\n\n- MCP: https://${c.HOST}/mcp\n- Free: https://${c.HOST}/v1/snapshot?target=389801252\n\n## Tools\n- app_snapshot: free\n- app_review_changes: $0.05\n- app_intel_report: $0.50\n- app_batch_scan: $0.03 per app (up to 50)\n- app_landscape: $5 (up to 10 apps)\n`,
     sitemapXml: (c) => `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://${c.HOST}/</loc></url><url><loc>https://${c.HOST}/pricing</loc></url><url><loc>https://${c.HOST}/dashboard</loc></url></urlset>`,
     wellKnown: (c) => ({
         x402Version: 1, network: c.NETWORK, chainId: c.CHAIN_ID, asset: c.USDC_BASE, payTo: c.PAY_TO, facilitator: c.FACILITATOR,
-        pricing: { changes: c.PRICE_CHANGES_USD, intel: c.PRICE_INTEL_USD },
+        pricing: { changes: c.PRICE_CHANGES_USD, intel: c.PRICE_INTEL_USD, batchPerApp: c.PRICE_PER_TARGET_USD, landscape: c.PRICE_LANDSCAPE_USD },
     }),
 
     renderHome, renderPricing, renderDashboard, renderLegal,

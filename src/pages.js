@@ -32,6 +32,7 @@ export function renderHome() {
 <div class="card"><b>$0.05</b><p class="muted">New/removed reviews; flags new negative</p><code>app_review_changes</code></div>
 <div class="card" style="border-color:var(--acc)"><b>$0.50 ⭐</b><p class="muted">Sentiment & negative-review report</p><code>app_intel_report</code></div>
 </div>
+<div class="card"><b>For teams scanning many apps</b><p class="muted"><code>$0.03 / app</code> batch (up to 50) &nbsp;·&nbsp; <code>$5</code> landscape (up to 10 apps) with rating ranking and risk flags.</p></div>
 <div class="card" style="border-color:var(--acc);background:linear-gradient(180deg,rgba(91,140,255,.10),var(--card))">
 <b>Continuous app intelligence?</b><p class="muted">Watch a portfolio of apps, get alerted on new negative reviews and releases. From <b>$99/month</b>, USDC, instant key.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><a href="/pricing"><button type="button">See plans</button></a><a href="/dashboard"><button type="button" class="ghost">Dashboard</button></a></div>

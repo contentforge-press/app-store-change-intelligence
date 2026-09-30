@@ -15,6 +15,8 @@ change intelligence settles in **USDC on Base via x402** (no card, no processor)
 | `app_snapshot` | free | version, rating, recent reviews |
 | `app_review_changes` | $0.05 | new/removed reviews; flags new negative |
 | `app_intel_report` | $0.50 | sentiment & negative-review report |
+| `app_batch_scan` | $0.03/app | scan up to 50 apps |
+| `app_landscape` | $5 | rating landscape across up to 10 apps |
 
 ## Plans
 Pro **$99/mo** · Business **$499/mo** · Enterprise **$2,000/mo** — self-serve at

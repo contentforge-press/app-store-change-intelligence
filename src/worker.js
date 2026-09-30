@@ -7,6 +7,8 @@ const cfg = {
     USDC_BASE: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     FACILITATOR: 'https://x402.org/facilitator',
     PRICE_CHANGES_USD: 0.05, PRICE_INTEL_USD: 0.50,
+    PRICE_PER_TARGET_USD: 0.03, BATCH_MAX: 50,
+    PRICE_LANDSCAPE_USD: 5, LANDSCAPE_MAX: 10,
     KV_BINDING: 'INTEL_KV',
     HOST: 'app-intel.contentforge-press.workers.dev',
     CONTACT_EMAIL: 'contentforge.press@outlook.com',
