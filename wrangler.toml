@@ -1,0 +1,11 @@
+name = "app-intel"
+main = "src/worker.js"
+compatibility_date = "2025-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "INTEL_KV"
+id = "645f9e6855f54b0d916cacdd0dec392d"
+
+[triggers]
+crons = ["0 8 * * *"]
