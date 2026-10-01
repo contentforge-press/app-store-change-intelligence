@@ -11,7 +11,7 @@ const cfg = {
     PRICE_CHANGES_USD: 0.05, PRICE_INTEL_USD: 0.50,
     PRICE_PER_TARGET_USD: 0.03, BATCH_MAX: 50,
     PRICE_LANDSCAPE_USD: 5, LANDSCAPE_MAX: 10,
-    KV_BINDING: 'INTEL_KV',
+    KV_BINDING: 'KV',
     SHARED_BINDING: 'SHARED_KV',
     HOST: 'app-intel.contentforge-press.workers.dev',
     CONTACT_EMAIL: 'contentforge.press@outlook.com',

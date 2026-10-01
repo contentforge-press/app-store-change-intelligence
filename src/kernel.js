@@ -459,6 +459,7 @@ export function createServer(A, cfg) {
         const url = new URL(request.url); const p = url.pathname;
         const kv = env[cfg.KV_BINDING];
         const skv = env[cfg.SHARED_BINDING] || kv;
+        globalThis.__APP_KV__ = kv;
 
         if (p === '/') return htmlAn(A.renderHome(),200,'/');
         if (p === '/changelog') return htmlAn(A.renderChangelog(cfg.TITLE || cfg.NAME));

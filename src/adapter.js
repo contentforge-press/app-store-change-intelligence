@@ -24,20 +24,61 @@ function parseTarget(input) {
 }
 
 // ---- 取数 ----
-async function getJson(u) {
-    const r = await fetch(u, { headers: { 'user-agent': 'intel-kernel/1.0' } });
-    if (!r.ok) throw new Error('upstream_' + r.status);
-    return r.json();
+const APPLE_HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+    accept: 'application/json, text/javascript, */*;q=0.8',
+    'accept-language': 'en-US,en;q=0.9',
+    referer: 'https://www.apple.com/',
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// JSON lookup：Apple 边缘对 Cloudflare 出口间歇性 403，多重试几次
+async function getJsonWithRetry(u, tries = 6) {
+    let last = 0;
+    for (let i = 0; i < tries; i++) {
+        const r = await fetch(u, { headers: APPLE_HEADERS });
+        if (r.ok) return r.json();
+        last = r.status;
+        if (r.status !== 403 && r.status !== 429) break;
+        await sleep(700 * (i + 1));
+    }
+    throw new Error('upstream_' + last + ' ' + u.replace('https://itunes.apple.com', ''));
+}
+
+// 评论改用 XML 源（JSON 评论源在 Cloudflare 出口被封，XML 源可达）
+function decodeEntities(s) {
+    return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+}
+function tag(block, name) {
+    const m = block.match(new RegExp('<' + name + '[^>]*>([\\s\\S]*?)</' + name + '>'));
+    return m ? decodeEntities(m[1].trim()) : '';
+}
+async function fetchReviewsXml(id) {
+    const url = `https://itunes.apple.com/us/rss/customerreviews/id=${encodeURIComponent(id)}/sortBy=mostRecent/xml`;
+    let r = await fetch(url, { headers: { ...APPLE_HEADERS, accept: 'application/xml, text/xml' } });
+    if (r.status === 403) { await sleep(800); r = await fetch(url, { headers: { ...APPLE_HEADERS, accept: 'application/xml, text/xml' } }); }
+    if (!r.ok) throw new Error('upstream_' + r.status + ' reviews-xml');
+    const xml = await r.text();
+    const entries = xml.split('<entry>').slice(1).map(e => e.split('</entry>')[0]);
+    return entries.map(e => ({
+        reviewId: tag(e, 'id'),
+        rating: Number(tag(e, 'im:rating') || 0),
+        title: tag(e, 'title'),
+        author: tag(e, 'author').replace(/<[^>]*>/g, '').trim(),
+        updated: tag(e, 'updated'),
+        version: tag(e, 'im:version'),
+        content: tag(e, 'content'),
+    }));
 }
 
 async function fetchMeta(id) {
-    const d = await getJson(`https://itunes.apple.com/lookup?id=${encodeURIComponent(id)}`);
+    const d = await getJsonWithRetry(`https://itunes.apple.com/lookup?id=${encodeURIComponent(id)}`);
     const x = d.results && d.results[0];
     if (!x) throw new Error('app_not_found');
     return { id, name: x.trackName, version: x.version, rating: x.averageUserRating, ratingCount: x.userRatingCount, seller: x.sellerName };
 }
 
-// 归一化单条评论
+// 归一化单条评论（保留以兼容，实际走 XML）
 function normReview(e) {
     const id = e.id?.label || e.id?.['im:id'] || '';
     return {
@@ -49,13 +90,27 @@ function normReview(e) {
     };
 }
 
-async function fetchSnapshot({ handle }) {
+function metaCacheKey(id) { return `appmeta-${id}`; }
+
+// fetchMeta 带 KV 缓存：lookup 被边缘拦截时回退到上次成功的元数据
+async function fetchMetaCached(id, kv) {
+    try {
+        const meta = await fetchMeta(id);
+        if (kv) { try { await kv.put(metaCacheKey(id), JSON.stringify({ ...meta, cachedAt: new Date().toISOString() })); } catch (e) {} }
+        return meta;
+    } catch (e) {
+        if (kv) {
+            const raw = await kv.get(metaCacheKey(id));
+            if (raw) { const m = JSON.parse(raw); delete m.cachedAt; return m; }
+        }
+        throw e;
+    }
+}
+
+async function fetchSnapshot({ handle }, kv) {
     const id = handle;
-    const meta = await fetchMeta(id);
-    const url = `https://itunes.apple.com/us/rss/customerreviews/id=${encodeURIComponent(id)}/sortBy=mostRecent/json`;
-    const d = await getJson(url);
-    const entries = Array.isArray(d.feed?.entry) ? d.feed.entry : [];
-    const items = entries.slice(1).map(normReview); // entry[0] 是应用摘要
+    const meta = await fetchMetaCached(id, globalThis.__APP_KV__);
+    const items = await fetchReviewsXml(id);
     return { platform: 'appstore', handle: id, meta, items };
 }
 
