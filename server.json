@@ -3,16 +3,22 @@
   "name": "io.github.contentforge-press/app-intel",
   "title": "App Store Change Intelligence",
   "description": "Track App Store apps: free snapshot, paid review & sentiment intel via x402 USDC.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "remotes": [
-    { "type": "streamable-http", "url": "https://app-intel.contentforge-press.workers.dev/mcp" }
+    {
+      "type": "streamable-http",
+      "url": "https://s-app.pixharvest.com/mcp"
+    }
   ],
   "packages": [
     {
       "registryType": "npm",
       "identifier": "app-store-change-intelligence",
       "version": "1.0.1",
-      "transport": { "type": "streamable-http", "url": "https://app-intel.contentforge-press.workers.dev/mcp" }
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://s-app.pixharvest.com/mcp"
+      }
     }
   ]
 }
