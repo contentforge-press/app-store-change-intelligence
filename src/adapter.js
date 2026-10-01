@@ -1,6 +1,6 @@
 // App Store Change Intelligence —— 适配器（仅 App Store 平台）
 // 监控公开 App Store 应用的：评论变化（新增差评/好评）、评分变化、版本更新。
-import { renderHome, renderPricing, renderDashboard, renderLegal, renderStatus } from './pages.js';
+import { renderHome, renderPricing, renderDashboard, renderLegal, renderStatus, renderChangelog } from './pages.js';
 
 const ID = 'app-intel';
 const TITLE = 'App Store Change Intelligence';
@@ -174,6 +174,6 @@ export const adapter = {
     }),
 
     STATUS_TARGET: '389801252',
-    renderStatus, renderHome, renderPricing, renderDashboard, renderLegal,
+    renderStatus, renderChangelog, renderHome, renderPricing, renderDashboard, renderLegal,
 };
 
