@@ -1,0 +1,119 @@
+{
+  "identifier": "contentforge-press-app-intel",
+  "name": "App Store Change Intelligence",
+  "version": "1.0.0",
+  "description": "Monitor App Store apps — new reviews, ratings, versions; automatic negative-review alerts. Agents pay in USDC on Base via x402.",
+  "category": "productivity",
+  "homepage": "https://github.com/contentforge-press/app-store-change-intelligence",
+  "cloudEndpoint": "https://s-app.pixharvest.com/mcp",
+  "icon": "📱",
+  "tags": [
+    "app-store",
+    "reviews",
+    "rating",
+    "monitoring",
+    "ios",
+    "x402",
+    "usdc"
+  ],
+  "localizations": [
+    {
+      "locale": "zh-CN",
+      "name": "App Store 应用变化情报",
+      "description": "监控 App Store 应用的新评论、评分与版本，自动预警差评。",
+      "tags": [
+        "app-store",
+        "评论",
+        "评分",
+        "监控",
+        "ios",
+        "x402"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "app_snapshot",
+      "description": "FREE. Current version, rating and recent reviews for one app.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "app_review_changes",
+      "description": "PAID ($0.05 USDC on Base via x402). New/removed reviews; flags every new 1-2 star review.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "app_intel_report",
+      "description": "PAID ($0.50 USDC on Base via x402). Sentiment & negative-review report with takeaways.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "app_batch_scan",
+      "description": "PAID ($0.03 per app USDC on Base via x402). Scan up to 50 apps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "numeric track ids"
+          }
+        },
+        "required": [
+          "targets"
+        ]
+      }
+    },
+    {
+      "name": "app_landscape",
+      "description": "PAID ($5 USDC on Base via x402). Rank up to 10 apps on rating and risk.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "numeric track ids"
+          }
+        },
+        "required": [
+          "targets"
+        ]
+      }
+    }
+  ]
+}
