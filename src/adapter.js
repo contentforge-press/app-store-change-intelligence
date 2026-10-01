@@ -125,6 +125,15 @@ export const adapter = {
         // first call: no history
         return { target: s.handle, app: s.meta.name, note: 'first_snapshot_baseline', recent: s.items.slice(0, 20) };
     },
+    winEvidence(kind, args, result) {
+        const d = result?.data ?? result;
+        if (kind === 'changes') return `Checked reviews for ${args.target}: ${d.recent?.length || 0} recent reviews fetched`;
+        if (kind === 'intel') return `Sentiment & negative-review report for ${args.target}`;
+        if (kind === 'batch') return `Scanned ${d.scanned ?? (args.targets || []).length} apps`;
+        if (kind === 'landscape') return `Landscape across ${(args.targets || []).length} apps`;
+        return `${kind} call`;
+    },
+    cliAttribution: `${TITLE} — free via x402 · remove attribution with Hobby $9/mo`,
     async _report(targetStr) {
         const t = parseTarget(targetStr); const s = await fetchSnapshot(t);
         return buildReport(s.meta, s.items, []);
