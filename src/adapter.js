@@ -151,7 +151,7 @@ export const adapter = {
     safeHandle, parseTarget, fetchSnapshot, diff, kvKey,
     async snapshot(t) {
         const s = await fetchSnapshot(t);
-        return { platform: s.platform, target: s.handle, app: s.meta.name, version: s.meta.version, rating: s.meta.rating, recentReviews: s.items.length, sample: s.items.slice(0, 20) };
+        return { platform: s.platform, target: s.handle, app: s.meta.name, version: s.meta.version, rating: s.meta.rating, recentReviews: s.items.length, sample: s.items.slice(0, 20), upgrade: 'Full change report — $0.05 USDC (Base) via x402 — GET /v1/cli?tool=changes&target=' + s.handle };
     },
     planFeatures: {
         pro: ['Track up to 25 apps', 'New review & rating alerts', 'Negative-review watch', 'All paid MCP tools', 'Email + webhook'],
